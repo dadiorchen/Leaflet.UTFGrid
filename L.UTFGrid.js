@@ -1,5 +1,6 @@
 //heavily modified from: https://raw.githubusercontent.com/danzel/Leaflet.utfgrid/leaflet-master/src/leaflet.utfgrid.js
 //depends on corslite
+const corslite = require("corslite");
 
 L.UTFGrid = L.TileLayer.extend({
 	options: {
@@ -45,8 +46,11 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype.onRemove.call(this, map);
 	},
 
-    createTile: function(coords) {
-        this._loadTile(coords);
+    createTile: function(coords, done) {
+        this._loadTile(coords)
+          .then(() => {
+            done(undefined, undefined);
+          });
         return document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
 	},
 
@@ -74,6 +78,7 @@ L.UTFGrid = L.TileLayer.extend({
     },
 
     _loadTile: function (coords) {
+      return new Promise((res, rej) => {
         var url = this.getTileUrl(coords);
 		var key = this._tileCoordsToKey(coords);
 		var self = this;
@@ -86,7 +91,10 @@ L.UTFGrid = L.TileLayer.extend({
             var data = JSON.parse(response.responseText);
             self._cache[key] = data;
             L.Util.bind(self._handleTileLoad, self)(key, data);
+          console.info("loaded utf");
+          res();
         }, true);
+      });
 	},
 
     _handleTileLoad: function(key, data) {
