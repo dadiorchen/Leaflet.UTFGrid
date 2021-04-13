@@ -85,16 +85,15 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype.onRemove.call(this, map);
 	},
 
-    createTile: function(coords) {
+    createTile: function(coords, done) {
         const loadTileWorker = this._loadTile(coords, () => {
-          //done(undefined, undefined);
+          done(undefined, undefined);
         })
         const tile = document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
       tile.cancelRequest = () => {
         console.warn("cancel the request");
         loadTileWorker.cancel();
       }
-      //done(undefined, undefined);
       return tile;
 	},
 
