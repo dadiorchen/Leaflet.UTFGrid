@@ -47,15 +47,16 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype.onRemove.call(this, map);
 	},
 
-    createTile: function(coords, done) {
-        this._loadTile(coords)
-          .then(() => {
-            done(undefined, undefined);
-          });
+    createTile: function(coords) {
+        const loadTileWorker = this._loadTile(coords, () => {
+          //done(undefined, undefined);
+        })
         const tile = document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
       tile.cancelRequest = () => {
         console.warn("cancel the request");
+        loadTileWorker.cancel();
       }
+      //done(undefined, undefined);
       return tile;
 	},
 
@@ -82,28 +83,44 @@ L.UTFGrid = L.TileLayer.extend({
         L.TileLayer.prototype._update.call(this, center, zoom);
     },
 
-    _loadTile: function (coords) {
-      return new Promise((res, rej) => {
+    _loadTile: function (coords, done) {
         var url = this.getTileUrl(coords);
 		var key = this._tileCoordsToKey(coords);
 		var self = this;
-        if (this._cache[key]) { return }
+        if (this._cache[key]) { 
+          console.debug("cached");
+          done();
+          return {
+            cancle: () => {console.debug("nothing to cancel");}
+          }
+        }
+        const source = axios.CancelToken.source();
         axios.request({
           url,
           method: "get",
+          cancelToken: source.token,
         })
           .then(response => {
             var data = response.data;
             self._cache[key] = data;
             L.Util.bind(self._handleTileLoad, self)(key, data);
             console.info("loaded utf");
-            res();
+            done();
           })
           .catch(e => {
-            console.error("error:", e);
-            self.fire('error', {error: e});
+            if(axios.isCancel(e)){
+              console.log("request canceled because of:", e.message);
+            }else{
+              console.error("error:", e);
+              self.fire('error', {error: e});
+            }
           });
-      });
+      return {
+        cancel: () => {
+          console.log("cancel source");
+          source.cancel("clean tiel request");
+        },
+      }
 	},
 
     _handleTileLoad: function(key, data) {
