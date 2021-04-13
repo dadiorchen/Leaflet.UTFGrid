@@ -51,7 +51,11 @@ L.UTFGrid = L.TileLayer.extend({
           .then(() => {
             done(undefined, undefined);
           });
-        return document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
+        const tile = document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
+      tile.cancelRequest = () => {
+        console.warn("cancel the request");
+      }
+      return tile;
 	},
 
     setUrl: function(url, noRedraw) {
