@@ -1,6 +1,7 @@
 //heavily modified from: https://raw.githubusercontent.com/danzel/Leaflet.utfgrid/leaflet-master/src/leaflet.utfgrid.js
 //depends on corslite
 const corslite = require("corslite");
+const axios = require("axios");
 
 L.UTFGrid = L.TileLayer.extend({
 	options: {
@@ -87,17 +88,21 @@ L.UTFGrid = L.TileLayer.extend({
 		var key = this._tileCoordsToKey(coords);
 		var self = this;
         if (this._cache[key]) { return }
-        corslite(url, function(err, response){
-            if (err) {
-                self.fire('error', {error: err});
-                return;
-            }
-            var data = JSON.parse(response.responseText);
+        axios.request({
+          url,
+          method: "get",
+        })
+          .then(response => {
+            var data = response.data;
             self._cache[key] = data;
             L.Util.bind(self._handleTileLoad, self)(key, data);
-          console.info("loaded utf");
-          res();
-        }, true);
+            console.info("loaded utf");
+            res();
+          })
+          .catch(e => {
+            console.error("error:", e);
+            self.fire('error', {error: e});
+          });
       });
 	},
 
