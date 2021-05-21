@@ -92,7 +92,11 @@ L.UTFGrid = L.TileLayer.extend({
         const tile = document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
       tile.cancelRequest = () => {
         console.warn("cancel the request");
-        loadTileWorker.cancel();
+        if(loadTileWorker && loadTileWorker.cancel instanceof Function){
+          loadTileWorker.cancel();
+        }else{
+          console.debug("It's not a function:", loadTileWorker);
+        }
       }
       return tile;
 	},
