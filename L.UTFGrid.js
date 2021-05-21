@@ -37,7 +37,7 @@ L.UTFGrid = L.TileLayer.extend({
         map.on('boxzoomend', this._throttleConnectEventHandlers, this);
         this._connectMapEventHandlers();
 
-    console.warn("this:", this);
+    //console.warn("this:", this);
     //try
     // Select the node that will be observed for mutations
     // Options for the observer (which mutations to observe)
@@ -49,19 +49,19 @@ L.UTFGrid = L.TileLayer.extend({
 
     // Callback function to execute when mutations are observed
     const callback = function(mutationsList, observer) {
-      console.log("mutationList:", mutationsList.length);
+      //console.log("mutationList:", mutationsList.length);
       // Use traditional 'for loops' for IE 11
       for(const mutation of mutationsList) {
         if (mutation.type === 'childList') {
-          console.log("mutation:", mutation);
-          console.log('A child node has been added or removed.');
+          //console.log("mutation:", mutation);
+          //console.log('A child node has been added or removed.');
           for(const removedNode of mutation.removedNodes){
-            console.log("cancel request");
+            //console.log("cancel request");
             removedNode.cancelRequest && removedNode.cancelRequest();
           }
         }
         else if (mutation.type === 'attributes') {
-          console.log('The ' + mutation.attributeName + ' attribute was modified.');
+          //console.log('The ' + mutation.attributeName + ' attribute was modified.');
         }
       }
     };
@@ -69,7 +69,7 @@ L.UTFGrid = L.TileLayer.extend({
     // Create an observer instance linked to the callback function
     const observer = new MutationObserver(callback);
 
-    console.warn("this:", this._container);
+    //console.warn("this:", this._container);
     // Start observing the target node for configured mutations
     observer.observe(
       this._container,
@@ -91,7 +91,7 @@ L.UTFGrid = L.TileLayer.extend({
         })
         const tile = document.createElement('div');  // empty DOM node, required because this overrides L.TileLayer
       tile.cancelRequest = () => {
-        console.warn("cancel the request");
+        //console.warn("cancel the request");
         if(loadTileWorker && loadTileWorker.cancel instanceof Function){
           loadTileWorker.cancel();
         }else{
@@ -129,7 +129,7 @@ L.UTFGrid = L.TileLayer.extend({
 		var key = this._tileCoordsToKey(coords);
 		var self = this;
         if (this._cache[key]) { 
-          console.debug("cached");
+          //console.debug("cached");
           done();
           return {
             cancle: () => {console.debug("nothing to cancel");}
@@ -145,12 +145,12 @@ L.UTFGrid = L.TileLayer.extend({
             var data = response.data;
             self._cache[key] = data;
             L.Util.bind(self._handleTileLoad, self)(key, data);
-            console.info("loaded utf");
+            //console.info("loaded utf");
             done();
           })
           .catch(e => {
             if(axios.isCancel(e)){
-              console.log("request canceled because of:", e.message);
+              //console.log("request canceled because of:", e.message);
             }else{
               console.error("error:", e);
               self.fire('error', {error: e});
@@ -158,7 +158,7 @@ L.UTFGrid = L.TileLayer.extend({
           });
       return {
         cancel: () => {
-          console.log("cancel source");
+          //console.log("cancel source");
           source.cancel("clean tiel request");
         },
       }
